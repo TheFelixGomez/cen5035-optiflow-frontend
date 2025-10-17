@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-// import { ordersApi } from '@/lib/api/orders';
 import type { Order, OrderStatus } from '@/types/order.types';
 import { toast } from './useToast';
-import { mockOrders, mockVendors } from '@/lib/mockData';
+import { mockOrders } from '@/lib/mockData';
 
 interface OrderFilters {
   status?: OrderStatus;
@@ -12,8 +11,7 @@ interface OrderFilters {
   dateTo?: string;
 }
 
-export const useOrders = (filters?: OrderFilters) => {
-  // MOCK DATA
+export function useOrders(filters?: OrderFilters) {
   return useQuery({
     queryKey: ['orders', filters],
     queryFn: async () => {
@@ -44,41 +42,15 @@ export const useOrders = (filters?: OrderFilters) => {
       return filtered;
     },
   });
-  
-  // REAL API - Uncomment when backend is ready
-  // return useQuery({
-  //   queryKey: ['orders', filters],
-  //   queryFn: () => ordersApi.getAll(filters),
-  // });
-};
+}
 
-export const useOrder = (id: string) => {
-  // MOCK DATA
-  return useQuery({
-    queryKey: ['order', id],
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockOrders.find(o => o.id === id) || null;
-    },
-    enabled: !!id,
-  });
-  
-  // REAL API
-  // return useQuery({
-  //   queryKey: ['order', id],
-  //   queryFn: () => ordersApi.getById(id),
-  //   enabled: !!id,
-  // });
-};
-
-export const useCreateOrder = () => {
+export function useCreateOrder() {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
     mutationFn: async (data: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'vendor'>) => {
       await new Promise(resolve => setTimeout(resolve, 500));
-      const vendor = mockVendors.find(v => v.id === data.vendorId);
+      const vendor = mockOrders[0].vendor; // Get vendor from mockData
       const newOrder: Order = {
         ...data,
         id: String(Date.now()),
@@ -92,43 +64,23 @@ export const useCreateOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
-        title: 'Order created',
-        description: 'The order has been created successfully.',
+        title: 'Success',
+        description: 'Order created successfully',
       });
     },
     onError: () => {
       toast({
         title: 'Error',
-        description: 'Failed to create order. Please try again.',
+        description: 'Failed to create order',
         variant: 'destructive',
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: (data: CreateOrderData) => ordersApi.create(data),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order created',
-  //       description: 'The order has been created successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to create order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
-};
+}
 
-export const useUpdateOrder = () => {
+export function useUpdateOrder() {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Order> }) => {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -142,44 +94,23 @@ export const useUpdateOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
-        title: 'Order updated',
-        description: 'The order has been updated successfully.',
+        title: 'Success',
+        description: 'Order updated successfully',
       });
     },
     onError: () => {
       toast({
         title: 'Error',
-        description: 'Failed to update order. Please try again.',
+        description: 'Failed to update order',
         variant: 'destructive',
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: ({ id, data }: { id: string; data: UpdateOrderData }) =>
-  //     ordersApi.update(id, data),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order updated',
-  //       description: 'The order has been updated successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to update order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
-};
+}
 
-export const useDeleteOrder = () => {
+export function useDeleteOrder() {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
     mutationFn: async (id: string) => {
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -191,35 +122,16 @@ export const useDeleteOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
-        title: 'Order deleted',
-        description: 'The order has been deleted successfully.',
+        title: 'Success',
+        description: 'Order deleted successfully',
       });
     },
     onError: () => {
       toast({
         title: 'Error',
-        description: 'Failed to delete order. Please try again.',
+        description: 'Failed to delete order',
         variant: 'destructive',
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: (id: string) => ordersApi.delete(id),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order deleted',
-  //       description: 'The order has been deleted successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to delete order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
-};
+}

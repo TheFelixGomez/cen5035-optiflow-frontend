@@ -66,7 +66,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/register')}
                 className="text-lg px-8 py-6"
               >
                 Get Started
@@ -161,7 +161,7 @@ export default function LandingPage() {
             <Button
               size="lg"
               variant="secondary"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/register')}
               className="text-lg px-8 py-6 shadow-lg hover:shadow-xl hover:scale-105 transition-all"
             >
               Get Started Now

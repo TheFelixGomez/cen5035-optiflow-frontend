@@ -4,9 +4,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import MainLayout from '@/components/layout/MainLayout';
+import PublicLayout from '@/components/layout/PublicLayout';
 import { CardSkeleton } from '@/components/common/LoadingSkeleton';
 
 // Lazy load pages for code splitting
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
@@ -42,6 +45,12 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              {/* Public Routes with Public Layout */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/about" element={<AboutPage />} />
+              </Route>
+
               {/* Auth Routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -54,9 +63,6 @@ function App() {
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
               </Route>
-
-              {/* Redirect root to dashboard */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               
               {/* 404 Page */}
               <Route path="*" element={<NotFoundPage />} />

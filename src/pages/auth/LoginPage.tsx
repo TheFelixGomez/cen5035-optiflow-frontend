@@ -18,7 +18,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, setUser } = useAuthStore();
 
   const {
     register,
@@ -47,6 +47,14 @@ export default function LoginPage() {
 
   const handleSkipToDashboard = () => {
     // Set user as authenticated when skipping
+    setUser({
+      id: 'mock-user-1',
+      email: 'demo@optiflow.com',
+      name: 'Demo User',
+      role: 'production_manager',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
     navigate('/dashboard');
   };
 

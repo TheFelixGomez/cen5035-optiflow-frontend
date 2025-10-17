@@ -51,12 +51,12 @@ export default function PublicLayout() {
               <div className="flex items-center space-x-3">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/login')}
                   className="hidden sm:inline-flex"
                 >
                   Sign In
                 </Button>
-                <Button onClick={() => navigate('/dashboard')}>
+                <Button onClick={() => navigate('/register')}>
                   Get Started
                 </Button>
               </div>

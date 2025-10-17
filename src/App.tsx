@@ -6,6 +6,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import MainLayout from '@/components/layout/MainLayout';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { CardSkeleton } from '@/components/common/LoadingSkeleton';
+import ScrollToTop from '@/components/common/ScrollToTop';
 
 // Lazy load pages for code splitting
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
@@ -43,6 +44,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <ScrollToTop />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Public Routes with Public Layout */}

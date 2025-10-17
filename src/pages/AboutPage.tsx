@@ -173,7 +173,7 @@ export default function AboutPage() {
           <Button
             size="lg"
             variant="secondary"
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/register')}
             className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             Start Using OptiFlow

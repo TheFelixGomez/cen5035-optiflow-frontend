@@ -45,8 +45,13 @@ export default function LoginPage() {
     }
   };
 
+  const handleSkipToDashboard = () => {
+    // Set user as authenticated when skipping
+    navigate('/dashboard');
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-amber-100 p-4">
+    <div className="flex items-center justify-center py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-primary">
@@ -99,9 +104,12 @@ export default function LoginPage() {
             </Link>
           </div>
           <div className="text-sm text-center text-gray-600">
-            <Link to="/dashboard" className="text-primary hover:underline font-medium">
+            <button 
+              onClick={handleSkipToDashboard}
+              className="text-primary hover:underline font-medium"
+            >
               Skip to Dashboard →
-            </Link>
+            </button>
           </div>
         </CardFooter>
       </Card>

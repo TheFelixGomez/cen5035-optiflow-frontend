@@ -21,42 +21,45 @@ export default function PublicLayout() {
               <span className="text-xl font-bold text-gray-900">OptiFlow</span>
             </Link>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <Link
-                to="/"
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/')
-                    ? 'text-primary'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                className={`text-sm font-medium transition-colors ${
-                  isActive('/about')
-                    ? 'text-primary'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                About
-              </Link>
-            </nav>
+            {/* Navigation and CTA Buttons - Right Side */}
+            <div className="flex items-center space-x-6">
+              {/* Navigation Links */}
+              <nav className="hidden md:flex items-center space-x-6">
+                <Link
+                  to="/"
+                  className={`text-sm font-medium transition-colors ${
+                    isActive('/')
+                      ? 'text-primary font-semibold'
+                      : 'text-gray-700 hover:text-primary'
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link
+                  to="/about"
+                  className={`text-sm font-medium transition-colors ${
+                    isActive('/about')
+                      ? 'text-primary font-semibold'
+                      : 'text-gray-700 hover:text-primary'
+                  }`}
+                >
+                  About
+                </Link>
+              </nav>
 
-            {/* CTA Buttons */}
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/dashboard')}
-                className="hidden sm:inline-flex"
-              >
-                Sign In
-              </Button>
-              <Button onClick={() => navigate('/dashboard')}>
-                Get Started
-              </Button>
+              {/* CTA Buttons */}
+              <div className="flex items-center space-x-3">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/dashboard')}
+                  className="hidden sm:inline-flex"
+                >
+                  Sign In
+                </Button>
+                <Button onClick={() => navigate('/dashboard')}>
+                  Get Started
+                </Button>
+              </div>
             </div>
           </div>
 

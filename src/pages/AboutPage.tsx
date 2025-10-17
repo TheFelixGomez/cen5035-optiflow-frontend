@@ -30,13 +30,13 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-amber-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 text-white py-20">
+      <div className="bg-gradient-to-r from-primary via-amber-500 to-amber-600 text-white py-20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">About OptiFlow</h1>
-            <p className="text-xl max-w-3xl mx-auto opacity-90">
+            <h1 className="text-5xl font-bold mb-6 drop-shadow-md">About OptiFlow</h1>
+            <p className="text-xl max-w-3xl mx-auto">
               A comprehensive production order management and scheduling software system
             </p>
           </div>
@@ -46,11 +46,11 @@ export default function AboutPage() {
       {/* Mission Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-4xl mx-auto">
-          <Card className="border-2">
-            <CardHeader>
-              <CardTitle className="text-3xl text-center">Our Mission</CardTitle>
+          <Card className="border-2 border-primary/20 shadow-xl hover:shadow-2xl transition-shadow">
+            <CardHeader className="bg-gradient-to-r from-amber-50 to-orange-50">
+              <CardTitle className="text-3xl text-center text-gray-900">Our Mission</CardTitle>
             </CardHeader>
-            <CardContent className="text-lg text-gray-700 space-y-4">
+            <CardContent className="text-lg text-gray-800 space-y-4 bg-white">
               <p>
                 OptiFlow is designed to improve efficiency in handling vendor orders and daily
                 production tasks. Our system provides a centralized platform to manage vendor and
@@ -86,15 +86,18 @@ export default function AboutPage() {
             {values.map((value, index) => {
               const Icon = value.icon;
               return (
-                <Card key={index} className="text-center border-2 hover:border-primary transition-colors">
+                <Card 
+                  key={index} 
+                  className="text-center border-2 border-gray-200 hover:border-primary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                >
                   <CardHeader>
-                    <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Icon className="h-8 w-8 text-primary" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                      <Icon className="h-8 w-8 text-white" />
                     </div>
-                    <CardTitle className="text-xl">{value.title}</CardTitle>
+                    <CardTitle className="text-xl text-gray-900">{value.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">{value.description}</p>
+                    <p className="text-gray-700">{value.description}</p>
                   </CardContent>
                 </Card>
               );
@@ -110,48 +113,48 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle>Vendor Management</CardTitle>
+          <Card className="border-l-4 border-l-primary hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-amber-50/50">
+              <CardTitle className="text-gray-900">Vendor Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Centralized platform to manage all vendor information, track interactions, and
                 maintain comprehensive vendor profiles.
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Tracking</CardTitle>
+          <Card className="border-l-4 border-l-amber-500 hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-amber-50/50">
+              <CardTitle className="text-gray-900">Order Tracking</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Complete order lifecycle management with status tracking, special requirements, and
                 real-time updates.
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Task Scheduling</CardTitle>
+          <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-amber-50/50">
+              <CardTitle className="text-gray-900">Task Scheduling</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Calendar-based scheduling system to manage workload, set deadlines, and ensure
                 timely completion of orders.
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Reporting System</CardTitle>
+          <Card className="border-l-4 border-l-amber-600 hover:shadow-lg transition-shadow">
+            <CardHeader className="bg-amber-50/50">
+              <CardTitle className="text-gray-900">Reporting System</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">
+              <p className="text-gray-700">
                 Generate detailed reports and summaries with PDF and CSV export capabilities for
                 analysis and record-keeping.
               </p>
@@ -162,16 +165,16 @@ export default function AboutPage() {
 
       {/* CTA Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="bg-gradient-to-r from-primary to-primary/80 rounded-2xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8 opacity-90">
+        <div className="bg-gradient-to-r from-primary via-amber-500 to-orange-500 rounded-2xl p-12 text-center text-white shadow-2xl">
+          <h2 className="text-4xl font-bold mb-4 drop-shadow-md">Ready to Get Started?</h2>
+          <p className="text-xl mb-8">
             Join businesses that are optimizing their production workflows with OptiFlow
           </p>
           <Button
             size="lg"
             variant="secondary"
             onClick={() => navigate('/dashboard')}
-            className="text-lg px-8 py-6"
+            className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             Start Using OptiFlow
             <ArrowRight className="ml-2 h-5 w-5" />

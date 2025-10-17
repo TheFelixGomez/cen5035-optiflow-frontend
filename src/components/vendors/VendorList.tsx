@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Trash2, Eye } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -32,9 +32,24 @@ export default function VendorList({ search, onEdit, onView }: VendorListProps) 
   const deleteVendor = useDeleteVendor();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [vendorToDelete, setVendorToDelete] = useState<Vendor | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  const handleRowClick = (vendor: Vendor) => {
+    setSelectedVendor(vendor);
+    setDetailsOpen(true);
+  };
+
+  const handleEdit = () => {
+    if (selectedVendor) {
+      setDetailsOpen(false);
+      onEdit(selectedVendor);
+    }
+  };
 
   const handleDeleteClick = (vendor: Vendor) => {
     setVendorToDelete(vendor);
+    setDetailsOpen(false);
     setDeleteDialogOpen(true);
   };
 
@@ -99,51 +114,86 @@ export default function VendorList({ search, onEdit, onView }: VendorListProps) 
                 <TableHead>Contact Person</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {vendors.map((vendor) => (
-                <TableRow key={vendor.id}>
+                <TableRow 
+                  key={vendor.id}
+                  className="cursor-pointer hover:bg-amber-50 transition-colors"
+                  onClick={() => handleRowClick(vendor)}
+                >
                   <TableCell className="font-medium">{vendor.name}</TableCell>
                   <TableCell>{vendor.contactPerson}</TableCell>
                   <TableCell>{vendor.email}</TableCell>
                   <TableCell>{vendor.phone}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onView(vendor)}
-                        title="View details"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(vendor)}
-                        title="Edit vendor"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(vendor)}
-                        title="Delete vendor"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Vendor Details Modal */}
+      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Vendor Details</DialogTitle>
+          </DialogHeader>
+          {selectedVendor && (
+            <div className="space-y-6">
+              {/* Vendor Information */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Name</label>
+                  <p className="mt-1 text-gray-900">{selectedVendor.name}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Contact Person</label>
+                  <p className="mt-1 text-gray-900">{selectedVendor.contactPerson}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Email</label>
+                  <p className="mt-1 text-gray-900">{selectedVendor.email}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Phone</label>
+                  <p className="mt-1 text-gray-900">{selectedVendor.phone}</p>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-700">Address</label>
+                  <p className="mt-1 text-gray-900">{selectedVendor.address}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setDetailsOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleEdit}
+                  className="text-primary hover:bg-primary/10"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteClick(selectedVendor)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

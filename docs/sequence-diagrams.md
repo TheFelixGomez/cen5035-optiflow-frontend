@@ -15,10 +15,10 @@ sequenceDiagram
 
     Manager->>Frontend: Fills out and submits new order form
     Frontend->>BackendAPI: POST /api/orders (order_data)
-    BackendAPI->>Database: Verify vendor exists
-    Database-->>BackendAPI: Vendor confirmed
-    BackendAPI->>Database: INSERT into Orders (order_details)
-    Database-->>BackendAPI: Order created successfully (returns new_order_id)
+    BackendAPI->>Database: findOne("vendors", { id: vendorId })
+    Database-->>BackendAPI: Vendor document
+    BackendAPI->>Database: insertOne("orders", orderDocument)
+    Database-->>BackendAPI: Insert acknowledged (returns _id)
     BackendAPI-->>Frontend: 201 Created (new_order)
     Frontend->>Manager: Display success message and new order details
 ```
@@ -36,8 +36,8 @@ sequenceDiagram
 
     Manager->>CalendarUI: Drags order to a new date
     CalendarUI->>BackendAPI: PATCH /api/orders/{id} (new_due_date)
-    BackendAPI->>Database: UPDATE orders SET due_date = new_due_date WHERE order_id = id
-    Database-->>BackendAPI: Update successful
+    BackendAPI->>Database: updateOne("orders", { _id: id }, { $set: { dueDate: newDate } })
+    Database-->>BackendAPI: Update acknowledged
     BackendAPI-->>CalendarUI: 200 OK (updated_order)
     CalendarUI->>Manager: Visually confirms order moved to new date
 ```
@@ -55,9 +55,9 @@ sequenceDiagram
 
     Manager->>ReportUI: Selects date range and clicks "Generate Report"
     ReportUI->>BackendAPI: GET /api/reports?start=...&end=...
-    BackendAPI->>Database: SELECT * FROM orders WHERE due_date BETWEEN start AND end
-    Database-->>BackendAPI: Returns list of orders
-    BackendAPI->>BackendAPI: Process and aggregate data
+    BackendAPI->>Database: aggregate("orders", pipeline for date range)
+    Database-->>BackendAPI: Aggregated order documents
+    BackendAPI->>BackendAPI: Post-process metrics
     BackendAPI-->>ReportUI: 200 OK (report_data)
     ReportUI->>Manager: Displays report summary on screen
     Manager->>ReportUI: Clicks "Export as PDF"
@@ -80,16 +80,17 @@ sequenceDiagram
 
     Manager->>Frontend: Submit registration form
     Frontend->>AuthAPI: POST /api/auth/register (credentials)
-    AuthAPI->>Database: SELECT user by email
+    AuthAPI->>Database: findOne("users", { email })
     Database-->>AuthAPI: User not found
-    AuthAPI->>Database: INSERT new user (hashed password)
-    Database-->>AuthAPI: User created
+    AuthAPI->>Database: insertOne("users", hashedUserDocument)
+    Database-->>AuthAPI: Insert acknowledged
     AuthAPI-->>Frontend: 201 Created (JWT, profile)
     Frontend->>Manager: Persist token and redirect to dashboard
     Manager->>Frontend: Submit login form
     Frontend->>AuthAPI: POST /api/auth/login (credentials)
-    AuthAPI->>Database: Verify password hash
-    Database-->>AuthAPI: Credentials valid
+    AuthAPI->>Database: findOne("users", { email })
+    Database-->>AuthAPI: User document
+    AuthAPI->>AuthAPI: Verify password hash
     AuthAPI-->>Frontend: 200 OK (JWT)
     Frontend->>Manager: Store session and load personalized data
 ```
@@ -113,13 +114,13 @@ sequenceDiagram
     else Updating existing vendor
         VendorFormUI->>BackendAPI: PUT /api/vendors/{id} (vendor_data)
     end
-    BackendAPI->>Database: UPSERT vendor record
-    Database-->>BackendAPI: Write successful
+    BackendAPI->>Database: updateOne("vendors", { _id: id }, { $set: vendorData }, { upsert: true })
+    Database-->>BackendAPI: Upsert acknowledged
     BackendAPI-->>VendorFormUI: 200 OK (vendor)
     VendorFormUI->>VendorHistoryUI: Trigger vendor list refresh
     VendorHistoryUI->>BackendAPI: GET /api/vendors/{id}/orders
-    BackendAPI->>Database: SELECT orders WHERE vendor_id = id
-    Database-->>BackendAPI: Related orders
+    BackendAPI->>Database: find("orders", { vendorId: id })
+    Database-->>BackendAPI: Matching orders
     BackendAPI-->>VendorHistoryUI: 200 OK (order history)
     VendorHistoryUI->>Manager: Display updated vendor details and history
 ```
@@ -139,15 +140,15 @@ sequenceDiagram
     Manager->>VendorListUI: Enter search keyword
     VendorListUI->>VendorListUI: Debounce and validate filters
     VendorListUI->>BackendAPI: GET /api/vendors?search=...
-    BackendAPI->>Database: SELECT vendors matching criteria
+    BackendAPI->>Database: find("vendors", searchQuery)
     Database-->>BackendAPI: Filtered vendors
     BackendAPI-->>VendorListUI: 200 OK (vendor list)
     VendorListUI->>Manager: Render filtered results
     Manager->>VendorListUI: Select vendor row
     VendorListUI->>VendorHistoryUI: Load vendor detail panel
     VendorHistoryUI->>BackendAPI: GET /api/vendors/{id}/orders
-    BackendAPI->>Database: SELECT orders WHERE vendor_id = id
-    Database-->>BackendAPI: Order history
+    BackendAPI->>Database: find("orders", { vendorId: id })
+    Database-->>BackendAPI: Order history documents
     BackendAPI-->>VendorHistoryUI: 200 OK (orders)
     VendorHistoryUI->>Manager: Present vendor profile with past orders
 ```
@@ -168,7 +169,7 @@ sequenceDiagram
     DashboardUI->>Manager: Display editable fields
     Manager->>DashboardUI: Submit status/instruction changes
     DashboardUI->>BackendAPI: PATCH /api/orders/{id} (status, instructions)
-    BackendAPI->>Database: UPDATE orders SET status = ..., instructions = ...
+    BackendAPI->>Database: updateOne("orders", { _id: id }, { $set: { status, instructions } })
     Database-->>BackendAPI: Update acknowledged
     BackendAPI-->>DashboardUI: 200 OK (updated_order)
     DashboardUI->>ToastService: Trigger success toast

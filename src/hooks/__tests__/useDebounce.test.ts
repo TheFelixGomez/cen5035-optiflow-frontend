@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { useDebounce } from '../useDebounce';
+import { act } from 'react';
 
 describe('useDebounce', () => {
   beforeEach(() => {
@@ -8,7 +9,8 @@ describe('useDebounce', () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it('returns initial value immediately', () => {
@@ -30,13 +32,13 @@ describe('useDebounce', () => {
     // Value should still be initial before delay
     expect(result.current).toBe('initial');
 
-    // Fast-forward time
-    vi.advanceTimersByTime(500);
-
-    // Wait for the debounced value to update
-    await waitFor(() => {
-      expect(result.current).toBe('updated');
+    // Fast-forward time and flush pending promises
+    await act(async () => {
+      vi.advanceTimersByTime(500);
     });
+
+    // Value should now be updated
+    expect(result.current).toBe('updated');
   });
 
   it('resets timer on value change', async () => {
@@ -47,21 +49,26 @@ describe('useDebounce', () => {
 
     // First update
     rerender({ value: 'first', delay: 500 });
-    vi.advanceTimersByTime(300);
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
 
     // Second update before first delay completes
     rerender({ value: 'second', delay: 500 });
-    vi.advanceTimersByTime(300);
+    await act(async () => {
+      vi.advanceTimersByTime(300);
+    });
 
     // Value should still be initial (timer was reset)
     expect(result.current).toBe('initial');
 
     // Complete the second delay
-    vi.advanceTimersByTime(200);
-
-    await waitFor(() => {
-      expect(result.current).toBe('second');
+    await act(async () => {
+      vi.advanceTimersByTime(200);
     });
+
+    // Value should now be updated to second
+    expect(result.current).toBe('second');
   });
 
   it('cleans up timeout on unmount', () => {
@@ -82,10 +89,10 @@ describe('useDebounce', () => {
     expect(numberResult.current).toBe(42);
 
     numberRerender({ value: 100 });
-    vi.advanceTimersByTime(500);
-    await waitFor(() => {
-      expect(numberResult.current).toBe(100);
+    await act(async () => {
+      vi.advanceTimersByTime(500);
     });
+    expect(numberResult.current).toBe(100);
 
     // Test with object
     const { result: objectResult, rerender: objectRerender } = renderHook(
@@ -95,10 +102,10 @@ describe('useDebounce', () => {
     expect(objectResult.current).toEqual({ name: 'test' });
 
     objectRerender({ value: { name: 'updated' } });
-    vi.advanceTimersByTime(500);
-    await waitFor(() => {
-      expect(objectResult.current).toEqual({ name: 'updated' });
+    await act(async () => {
+      vi.advanceTimersByTime(500);
     });
+    expect(objectResult.current).toEqual({ name: 'updated' });
   });
 
   it('uses default delay of 500ms when not specified', async () => {
@@ -108,12 +115,14 @@ describe('useDebounce', () => {
     );
 
     rerender({ value: 'updated' });
-    vi.advanceTimersByTime(499);
+    await act(async () => {
+      vi.advanceTimersByTime(499);
+    });
     expect(result.current).toBe('initial');
 
-    vi.advanceTimersByTime(1);
-    await waitFor(() => {
-      expect(result.current).toBe('updated');
+    await act(async () => {
+      vi.advanceTimersByTime(1);
     });
+    expect(result.current).toBe('updated');
   });
 });

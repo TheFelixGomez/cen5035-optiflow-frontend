@@ -1,128 +1,143 @@
-import { useState } from 'react';
-import { Plus, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import VendorList from '@/components/vendors/VendorList';
-import VendorForm from '@/components/vendors/VendorForm';
-import VendorDetails from '@/components/vendors/VendorDetails';
-import { useCreateVendor, useUpdateVendor } from '@/hooks/useVendors';
-import { useDebounce } from '@/hooks/useDebounce';
-import type { Vendor } from '@/types/vendor.types';
+import { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
+
+type Vendor = {
+  id?: string;
+  company: string;
+  contact_person: string;
+  email: string;
+  phone: string;
+  address: string;
+  notes: string;
+};
 
 export default function VendorsPage() {
-  const [search, setSearch] = useState('');
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
-  const debouncedSearch = useDebounce(search, 300);
-  const createVendor = useCreateVendor();
-  const updateVendor = useUpdateVendor();
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [filtered, setFiltered] = useState<Vendor[]>([]);
+  const [search, setSearch] = useState("");
 
-  const handleCreate = (data: any) => {
-    createVendor.mutate(data, {
-      onSuccess: () => {
-        setIsCreateOpen(false);
-      },
-    });
-  };
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
-  const handleEdit = (vendor: Vendor) => {
-    setSelectedVendor(vendor);
-    setIsEditOpen(true);
-  };
 
-  const handleUpdate = (data: any) => {
-    if (selectedVendor) {
-      updateVendor.mutate(
-        { id: selectedVendor.id, data },
-        {
-          onSuccess: () => {
-            setIsEditOpen(false);
-            setSelectedVendor(null);
-          },
-        }
-      );
+  // FETCH VENDORS FROM BACKEND
+
+  useEffect(() => {
+    async function loadVendors() {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/vendors/`
+        );
+        setVendors(res.data || []);
+        setFiltered(res.data || []);
+      } catch {
+        console.log("No vendors yet — backend not ready");
+        setVendors([]);
+        setFiltered([]);
+      }
     }
-  };
 
-  const handleView = (vendor: Vendor) => {
-    setSelectedVendor(vendor);
-    setIsViewOpen(true);
-  };
+    loadVendors();
+  }, []);
+
+
+  // SEARCH FILTER
+
+  useEffect(() => {
+    const results = vendors.filter((v) =>
+      v.company?.toLowerCase().includes(search.toLowerCase())
+    );
+    setFiltered(results);
+    setCurrentPage(1);
+  }, [search, vendors]);
+
+  // PAGINATION CALC
+
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const startIdx = (currentPage - 1) * pageSize;
+  const currentItems = filtered.slice(startIdx, startIdx + pageSize);
+
+
+  // UI
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Vendors</h1>
-          <p className="text-gray-600">Manage your vendor relationships</p>
-        </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Vendor
-        </Button>
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Vendors</h1>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search vendors..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+      {/* SEARCH BAR */}
+      <Input
+        placeholder="Search vendors..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full max-w-sm"
+      />
+
+      {/* TABLE */}
+      <div className="bg-white border rounded-lg shadow-sm p-4">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2 text-left">Company</th>
+              <th className="py-2 text-left">Contact Person</th>
+              <th className="py-2 text-left">Email</th>
+              <th className="py-2 text-left">Phone</th>
+              <th className="py-2 text-left">Address</th>
+              <th className="py-2 text-left">Notes</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {currentItems.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-4 text-center text-gray-500">
+                  No vendors available.
+                </td>
+              </tr>
+            ) : (
+              currentItems.map((vendor) => (
+                <tr key={vendor.id} className="border-b">
+                  <td className="py-2">{vendor.company}</td>
+                  <td className="py-2">{vendor.contact_person}</td>
+                  <td className="py-2">{vendor.email}</td>
+                  <td className="py-2">{vendor.phone}</td>
+                  <td className="py-2">{vendor.address}</td>
+                  <td className="py-2">{vendor.notes}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* PAGINATION */}
+        <div className="flex justify-center items-center mt-4 space-x-3">
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Prev
+          </button>
+
+          <span>
+            Page {currentPage} of {totalPages || 1}
+          </span>
+
+          <button
+            className="px-3 py-1 border rounded disabled:opacity-50"
+            disabled={currentPage === totalPages || totalPages === 0}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Next
+          </button>
         </div>
       </div>
-
-      <VendorList search={debouncedSearch} onEdit={handleEdit} onView={handleView} />
-
-      {/* Create Vendor Dialog */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Create New Vendor</DialogTitle>
-          </DialogHeader>
-          <VendorForm
-            onSubmit={handleCreate}
-            onCancel={() => setIsCreateOpen(false)}
-            isLoading={createVendor.isPending}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Vendor Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Vendor</DialogTitle>
-          </DialogHeader>
-          {selectedVendor && (
-            <VendorForm
-              vendor={selectedVendor}
-              onSubmit={handleUpdate}
-              onCancel={() => {
-                setIsEditOpen(false);
-                setSelectedVendor(null);
-              }}
-              isLoading={updateVendor.isPending}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* View Vendor Dialog */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Vendor Details</DialogTitle>
-          </DialogHeader>
-          {selectedVendor && <VendorDetails vendor={selectedVendor} />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

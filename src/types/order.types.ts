@@ -1,4 +1,4 @@
-import { Vendor } from './vendor.types';
+import type {Vendor} from './vendor.types';
 
 export type OrderStatus = 'pending' | 'in_progress' | 'completed';
 

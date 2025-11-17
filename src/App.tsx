@@ -1,78 +1,61 @@
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import ErrorBoundary from '@/components/common/ErrorBoundary';
-import MainLayout from '@/components/layout/MainLayout';
-import PublicLayout from '@/components/layout/PublicLayout';
-import { CardSkeleton } from '@/components/common/LoadingSkeleton';
-import ScrollToTop from '@/components/common/ScrollToTop';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect, useCallback } from "react";
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/auth/LoginPage";
+import PrivateRoute from "./components/common/PrivateRoute";
+import MainLayout from "./components/layout/MainLayout";
+import CustomerView from "./pages/customer/CustomerView";
+import VendorsPage from "./pages/VendorsPage";
+import OrdersPage from "./pages/OrdersPage";
+import CalendarPage from "./pages/CalendarPage";
+import ReportsPage from "./pages/ReportsPage";
 
-// Lazy load pages for code splitting
-const LandingPage = lazy(() => import('@/pages/LandingPage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
-const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
-const VendorsPage = lazy(() => import('@/pages/VendorsPage'));
-const OrdersPage = lazy(() => import('@/pages/OrdersPage'));
-const CalendarPage = lazy(() => import('@/pages/CalendarPage'));
-const ReportsPage = lazy(() => import('@/pages/ReportsPage'));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+import { useAuth } from "./stores/auth.store";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+function AppRoutes() {
+  const { bootstrap } = useAuth();
+  const location = useLocation();
 
-// Loading fallback component
-function PageLoader() {
+  // Wrap bootstrap so it is stable and ESLint is happy
+  const doBootstrap = useCallback(() => {
+    bootstrap();
+  }, [bootstrap]);
+
+  // Run on first load + every navigation (back/forward included)
+  useEffect(() => {
+    doBootstrap();
+  }, [location.pathname, doBootstrap]);
+
   return (
-    <div className="container mx-auto py-8">
-      <CardSkeleton />
-    </div>
+    <Routes>
+      {/* PUBLIC ROUTES */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route
+        element={
+          <PrivateRoute>
+            <MainLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route path="/dashboard" element={<CustomerView />} />
+        <Route path="/vendors" element={<VendorsPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+      </Route>
+
+      {/* FALLBACK */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
-function App() {
+export default function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Public Routes with Public Layout */}
-              <Route element={<PublicLayout />}>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-              </Route>
-
-              {/* Main App Routes - No Auth Guard */}
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/vendors" element={<VendorsPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/calendar" element={<CalendarPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-              </Route>
-              
-              {/* 404 Page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-          <Toaster />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
-
-export default App;

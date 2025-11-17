@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/stores/auth.store';
+//import { useAuth } from '@/stores/authStore';
 import Footer from './Footer';
 import {
   LayoutDashboard,
@@ -15,7 +16,7 @@ import {
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -72,7 +73,7 @@ export default function MainLayout() {
               {isAuthenticated && user ? (
                 <>
                   <span className="text-sm text-gray-600 hidden sm:block">
-                    {user.name}
+                    {user.username}
                   </span>
                   <Button
                     variant="outline"

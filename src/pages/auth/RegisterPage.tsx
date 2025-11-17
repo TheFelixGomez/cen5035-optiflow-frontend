@@ -26,7 +26,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const { register: registerUser, isLoading, setUser } = useAuth();
+  const { register: registerUser, loading } = useAuth();
 
   const {
     register,
@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await registerUser(data);
+      await registerUser(data.email, data.password);
       toast({
         title: 'Registration successful',
         description: 'Welcome to OptiFlow!',
@@ -54,15 +54,15 @@ export default function RegisterPage() {
   };
 
   const handleSkipToDashboard = () => {
-    // Set user as authenticated when skipping
-    setUser({
-      id: 'mock-user-1',
-      email: 'demo@optiflow.com',
-      name: 'Demo User',
-      role: 'production_manager',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    // TODO: setUser doesn't exist. It could be used to set user as authenticated when skipping
+    // setUser({
+    //   id: 'mock-user-1',
+    //   email: 'demo@optiflow.com',
+    //   name: 'Demo User',
+    //   role: 'production_manager',
+    //   createdAt: new Date().toISOString(),
+    //   updatedAt: new Date().toISOString(),
+    // });
     navigate('/dashboard');
   };
 
@@ -86,7 +86,7 @@ export default function RegisterPage() {
                 type="text"
                 placeholder="John Doe"
                 {...register('name')}
-                disabled={isLoading}
+                disabled={loading}
               />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="your.email@example.com"
                 {...register('email')}
-                disabled={isLoading}
+                disabled={loading}
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
@@ -114,7 +114,7 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 {...register('password')}
-                disabled={isLoading}
+                disabled={loading}
               />
               {errors.password && (
                 <p className="text-sm text-red-500">{errors.password.message}</p>
@@ -128,15 +128,15 @@ export default function RegisterPage() {
                 type="password"
                 placeholder="••••••••"
                 {...register('confirmPassword')}
-                disabled={isLoading}
+                disabled={loading}
               />
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create Account'}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
         </CardContent>

@@ -1,31 +1,20 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
+import {TrendingUp} from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Package,
-  Clock,
-  CheckCircle,
-  TrendingUp
-} from "lucide-react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  Legend,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    LineChart,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from "recharts";
 
 const COLORS = {

@@ -282,10 +282,10 @@ When ready to add authentication protection:
 ```tsx
 // src/components/common/ProtectedRoute.tsx
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/store/authStore';
 
 export default function ProtectedRoute() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

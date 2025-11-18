@@ -1,3 +1,4 @@
+import { useAuth } from "@/stores/auth.store";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -6,12 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Package,
-  Clock,
-  CheckCircle,
-  TrendingUp
-} from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -34,7 +30,6 @@ const COLORS = {
   completed: "#10B981",
 };
 
-// TYPES
 type Order = {
   id: string;
   vendor_id: string;
@@ -48,7 +43,6 @@ type Vendor = {
   company: string;
 };
 
-// Response types from backend
 type RawOrder = {
   _id: string;
   vendor_id: string;
@@ -63,16 +57,17 @@ type RawVendor = {
 };
 
 export default function DashboardPage() {
+  const { role } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {
     async function loadData() {
-      // ---------- FETCH ORDERS ----------
+      // Orders
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/orders/`);
         const data: RawOrder[] = await res.json();
-
         const normalized: Order[] = data.map((o) => ({
           id: o._id,
           vendor_id: o.vendor_id,
@@ -80,32 +75,41 @@ export default function DashboardPage() {
           order_date: o.order_date,
           total_amount: o.total_amount ?? 0,
         }));
-
         setOrders(normalized);
       } catch {
         setOrders([]);
       }
 
-      // ---------- FETCH VENDORS (if backend not ready, stays empty) ----------
+      // Vendors
       try {
         const resV = await fetch(`${import.meta.env.VITE_API_URL}/vendors/`);
         const dataV: RawVendor[] = await resV.json();
-
         const normalizedV: Vendor[] = dataV.map((v) => ({
           id: v._id,
           company: v.company,
         }));
-
         setVendors(normalizedV);
       } catch {
         setVendors([]);
       }
+
+      // User Count (Admin)
+      if (role === "admin") {
+        try {
+          const resC = await fetch(`${import.meta.env.VITE_API_URL}/users/count`);
+          const dataC = await resC.json();
+          setUserCount(dataC.count ?? 0);
+        } catch {
+          setUserCount(null);
+        }
+      } else {
+        setUserCount(null);
+      }
     }
 
     loadData();
-  }, []);
+  }, [role]);
 
-  // ----------- COMPUTED VALUES -----------
   const totalOrders = orders.length;
   const pending = orders.filter((o) => o.status === "pending").length;
   const inProgress = orders.filter((o) => o.status === "in_progress").length;
@@ -139,8 +143,8 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* STAT CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* STAT CARDS — 3 on first row, 2 on second */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
         {/* Total Orders */}
         <Card className="border-2 border-gray-200 hover:border-primary hover:shadow-xl transition-all">
@@ -189,6 +193,27 @@ export default function DashboardPage() {
             Delivered
           </CardContent>
         </Card>
+
+        {/* ADMIN ONLY — PURPLE CARD (same size) */}
+        {role === "admin" && (
+          <Card className="border-2 border-purple-400 hover:border-purple-600 hover:shadow-xl transition-all">
+            <CardHeader className="pb-3 bg-gradient-to-br from-purple-50 to-purple-100 flex flex-row justify-between">
+              <CardTitle className="text-sm font-medium text-purple-700">
+                Total Users
+              </CardTitle>
+              <TrendingUp className="h-5 w-5 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-4xl font-bold text-purple-700">
+                {userCount !== null ? userCount : "--"}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Registered accounts
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
       </div>
 
       {/* TWO CHARTS ROW */}
@@ -216,11 +241,6 @@ export default function DashboardPage() {
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
-                    label={(props) => {
-                      const name = props.name as string;
-                      const percent = props.percent as number;
-                      return `${name}: ${(percent * 100).toFixed(0)}%`;
-                    }}
                     dataKey="value"
                   >
                     {statusData.map((entry, i) => (

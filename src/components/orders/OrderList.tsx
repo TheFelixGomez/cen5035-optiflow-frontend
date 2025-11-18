@@ -29,7 +29,7 @@ interface OrderListProps {
   onView: (order: Order) => void;
 }
 
-export default function OrderList({ filters, onEdit, onView }: OrderListProps) {
+export default function OrderList({ filters, onEdit }: OrderListProps) {
   const { data: orders, isLoading, error } = useOrders(filters);
   const deleteOrder = useDeleteOrder();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

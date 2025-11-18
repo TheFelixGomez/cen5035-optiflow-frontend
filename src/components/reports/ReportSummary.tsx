@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ReportSummary as ReportSummaryType } from '@/types/report.types';
+import {Card, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import type {ReportSummary as ReportSummaryType} from '@/types/report.types';
 
 interface ReportSummaryProps {
   summary: ReportSummaryType;

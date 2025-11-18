@@ -1,12 +1,11 @@
-import { useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, EventDropArg, DateSelectArg } from '@fullcalendar/core';
-import { useOrders, useUpdateOrder } from '@/hooks/useOrders';
-import type { Order, OrderStatus } from '@/types/order.types';
-import { toast } from '@/hooks/useToast';
+import type {DateSelectArg, EventClickArg, EventDropArg} from '@fullcalendar/core';
+import {useOrders, useUpdateOrder} from '@/hooks/useOrders';
+import type {Order, OrderStatus} from '@/types/order.types';
+import {toast} from '@/hooks/useToast';
 
 interface CalendarViewProps {
   statusFilter?: OrderStatus | 'all';

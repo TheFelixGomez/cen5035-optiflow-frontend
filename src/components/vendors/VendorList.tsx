@@ -1,25 +1,18 @@
-import { useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import {useState} from 'react';
+import {Pencil, Trash2} from 'lucide-react';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent} from '@/components/ui/card';
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from '@/components/ui/table';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
-import { useVendors, useDeleteVendor } from '@/hooks/useVendors';
-import type { Vendor } from '@/types/vendor.types';
+import {useDeleteVendor, useVendors} from '@/hooks/useVendors';
+import type {Vendor} from '@/types/vendor.types';
 
 interface VendorListProps {
   search: string;
@@ -27,7 +20,7 @@ interface VendorListProps {
   onView: (vendor: Vendor) => void;
 }
 
-export default function VendorList({ search, onEdit, onView }: VendorListProps) {
+export default function VendorList({ search, onEdit}: VendorListProps) {
   const { data: vendors, isLoading, error } = useVendors(search);
   const deleteVendor = useDeleteVendor();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

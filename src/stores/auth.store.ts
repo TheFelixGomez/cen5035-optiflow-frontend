@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import { registerUser, login, getCurrentUser, type User} from "@/lib/api/auth";
-type Role = "admin" | "customer";
+import { registerUser, login, getCurrentUser, type User } from "@/lib/api/auth";
 
-function inferRole(username?: string): Role {
+type UserRole = "admin" | "customer";
+
+function inferRole(username?: string): UserRole {
   const raw = import.meta.env.VITE_ADMIN_USERS as string | undefined;
   const admins = (raw ?? "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
   return username && admins.includes(username.toLowerCase()) ? "admin" : "customer";
@@ -10,15 +11,15 @@ function inferRole(username?: string): Role {
 
 type AuthState = {
   user: User | null;
-  role: Role | null;
+  role: UserRole | null;
   token: string | null;
   loading: boolean;
   error: string | null;
-  isAuthenticated: boolean; 
-  login: (u: string, p: string) => Promise<void>;
-  register: (u: string, p: string) => Promise<void>;
-  logout: () => void;
+  isAuthenticated: boolean;
   bootstrap: () => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
+  logout: () => void;
 };
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -42,17 +43,23 @@ export const useAuth = create<AuthState>((set, get) => ({
     }
   },
 
-  login: async (username, password) => {
-    set({ loading: true, error: null });
-    try {
-      const t = await login(username, password);
-      localStorage.setItem("of_token", t.access_token);
-      const user = await getCurrentUser();
-      set({ token: t.access_token, user, role: inferRole(user.username), loading: false });
-    } catch {
-      set({ loading: false, error: "Invalid credentials" });
-    }
-  },
+login: async (username, password) => {
+  set({ loading: true, error: null });
+  try {
+    const t = await login(username, password);
+    localStorage.setItem("of_token", t.access_token);
+    const user = await getCurrentUser();
+    set({
+      token: t.access_token,
+      user,
+      role: inferRole(user.username),
+      loading: false,
+      isAuthenticated: true,
+    });
+  } catch {
+    set({ loading: false, error: "Invalid credentials", isAuthenticated: false });
+  }
+},
 
   register: async (username, password) => {
     set({ loading: true, error: null });

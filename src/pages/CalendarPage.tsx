@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import axios from "axios";
-
-import { Input } from "@/components/ui/input";
+import type { DatesSetArg, EventDropArg } from "@fullcalendar/core";
+import { useCalendarEvents, useUpdateCalendarEvent } from "@/hooks/useCalendar";
+import type { CalendarRange } from "@/lib/api/calendar";
+import type { OrderStatus } from "@/types/order.types";
+import { toast } from "@/hooks/useToast";
 import {
   Select,
   SelectTrigger,
@@ -13,170 +15,111 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/* -----------------------------
-   TYPES
------------------------------ */
-
-type OrderItem = {
-  name: string;
-  price: number;
-  quantity: number;
-};
-
-type RawOrder = {
-  _id: string;
-  vendor_id: string;
-  order_date: string;
-  status: string;
-  total_amount: number;
-  items: OrderItem[];
-};
-
-type Order = {
-  id: string;
-  vendor_id: string;
-  order_date: string;
-  status: string;
-  total_amount: number;
-  items: OrderItem[];
-};
-
-type CalendarEvent = {
-  id: string;
-  title: string;
-  date: string;
-  backgroundColor: string;
-  borderColor: string;
-  extendedProps: {
-    vendor: string;
-    total: number;
-  };
-};
 
 /* -----------------------------
    COMPONENT
 ----------------------------- */
 
 export default function CalendarPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [vendorFilter, setVendorFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+  const [range, setRange] = useState<CalendarRange>();
 
-  /* -----------------------------
-     LOAD ORDERS
-  ----------------------------- */
-  useEffect(() => {
-    async function loadOrders() {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/orders/`
-        );
+  const { data: orders, isLoading } = useCalendarEvents(range);
+  const updateEvent = useUpdateCalendarEvent();
 
-        const normalized: Order[] = (res.data as RawOrder[]).map((o) => ({
-          id: o._id,
-          vendor_id: o.vendor_id,
-          order_date: o.order_date,
-          status: o.status,
-          total_amount: o.total_amount,
-          items: o.items,
-        }));
+  const getStatusColor = (status: OrderStatus) => {
+    const colors = {
+      pending: '#F59E0B',
+      in_progress: '#3B82F6',
+      completed: '#10B981',
+    };
+    return colors[status];
+  };
 
-        setOrders(normalized);
-      } catch {
-        console.log("Could not load orders");
-      }
-    }
+  // Filter orders by status
+  const filteredOrders = statusFilter === 'all'
+    ? orders
+    : orders.filter(o => o.status === statusFilter);
 
-    loadOrders();
-  }, []);
+  // Convert to calendar events
+  const events = filteredOrders.map((order) => ({
+    id: order.id,
+    title: `Order #${order.id.slice(0, 8)} - ${order.status.replace('_', ' ').toUpperCase()}`,
+    start: order.dueDate,
+    backgroundColor: getStatusColor(order.status),
+    borderColor: getStatusColor(order.status),
+    extendedProps: { order },
+  }));
 
-  /* -----------------------------
-     APPLY FILTERS
-  ----------------------------- */
-  useEffect(() => {
-    let filtered = [...orders];
+  const handleDatesSet = (arg: DatesSetArg) => {
+    setRange({
+      start: arg.startStr,
+      end: arg.endStr,
+    });
+  };
 
-    // Filter by vendor
-    if (vendorFilter.trim() !== "") {
-      filtered = filtered.filter((o) =>
-        o.vendor_id.toLowerCase().includes(vendorFilter.toLowerCase())
-      );
-    }
+  const handleEventDrop = (info: EventDropArg) => {
+    const newDate = info.event.start;
+    if (!newDate) return;
 
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter((o) => o.status === statusFilter);
-    }
-
-    // Convert to Calendar Events
-    const calendarEvents: CalendarEvent[] = filtered.map((o) => ({
-      id: o.id,
-      title: o.status.replace("_", " ").toUpperCase(),
-      date: o.order_date,
-      backgroundColor:
-        o.status === "pending"
-          ? "#fcd34d"
-          : o.status === "in_progress"
-          ? "#60a5fa"
-          : "#4ade80",
-      borderColor: "transparent",
-      extendedProps: {
-        vendor: o.vendor_id,
-        total: o.total_amount,
+    updateEvent.mutate(
+      {
+        id: info.event.id,
+        dueDate: newDate.toISOString(),
       },
-    }));
-
-    setEvents(calendarEvents);
-  }, [orders, vendorFilter, statusFilter]);
+      {
+        onError: () => {
+          info.revert();
+          toast({
+            title: 'Error',
+            description: 'Failed to reschedule order',
+            variant: 'destructive',
+          });
+        },
+      }
+    );
+  };
 
   /* -----------------------------
      UI
   ----------------------------- */
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-gray-500">Loading calendar...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-
       <h1 className="text-2xl font-bold">Calendar</h1>
 
-      {/* --------------------------
-          FILTER BAR (IDENTICAL TO ORDERSPAGE)
-      --------------------------- */}
       <div className="flex gap-4 items-center flex-wrap">
-
-        {/* SEARCH BAR – same as OrdersPage */}
-        <Input
-          placeholder="Search by vendor..."
-          value={vendorFilter}
-          onChange={(e) => setVendorFilter(e.target.value)}
-          className="w-full max-w-sm"
-        />
-
-        {/* STATUS FILTER – same width, same styling */}
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as OrderStatus | 'all')}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Filter status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="in_progress">In Progress</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
           </SelectContent>
         </Select>
-
       </div>
 
-      {/* --------------------------
-          CALENDAR
-      --------------------------- */}
       <div className="bg-white p-4 border rounded-lg shadow-sm">
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           height="auto"
+          editable
           selectable
           events={events}
+          datesSet={handleDatesSet}
+          eventDrop={handleEventDrop}
         />
       </div>
     </div>

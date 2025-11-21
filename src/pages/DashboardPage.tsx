@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "@/components/ui/card";
 import {TrendingUp} from "lucide-react";
+import { useAuth } from "@/stores/auth.store";
 import {
     Bar,
     BarChart,

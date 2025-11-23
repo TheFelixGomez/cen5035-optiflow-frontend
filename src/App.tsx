@@ -9,6 +9,7 @@ import VendorsPage from "./pages/VendorsPage";
 import OrdersPage from "./pages/OrdersPage";
 import CalendarPage from "./pages/CalendarPage";
 import ReportsPage from "./pages/ReportsPage";
+import UsersPage from "./pages/UsersPage";
 
 import { useAuth } from "./stores/auth.store";
 
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<CustomerView />} />
         <Route path="/vendors" element={<VendorsPage />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/users" element={<UsersPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/reports" element={<ReportsPage />} />
       </Route>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/stores/auth.store";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/useToast";
 import {
   Select,
   SelectTrigger,
@@ -131,7 +132,10 @@ export default function OrdersPage() {
     try {
       // If NO vendors → stop and show message
       if (vendors.length === 0) {
-        alert("No vendors found. Please create vendors first!");
+        toast({
+          title: "No vendors found",
+          description: "Please create vendors before creating an order.",
+        });
         return;
       }
 
@@ -145,9 +149,17 @@ export default function OrdersPage() {
         items: [{ name: "New Item", price: 10, quantity: 1 }],
       });
 
+      toast({
+        title: "Order created",
+        description: "New order has been created successfully.",
+      });
       window.location.reload();
     } catch {
-      alert("Failed to create order — check backend and vendor list.");
+      toast({
+        title: "Failed to create order",
+        description: "Please check the backend and vendor list.",
+        variant: "destructive",
+      });
     }
   }
 

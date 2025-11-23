@@ -1,7 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/stores/auth.store';
-//import { useAuth } from '@/stores/authStore';
 import Footer from './Footer';
 import {
   LayoutDashboard,
@@ -11,25 +10,37 @@ import {
   FileText,
   LogOut,
   LogIn,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, role, isAuthenticated, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const navItems = [
+  const baseNavItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/vendors', label: 'Vendors', icon: Users },
     { path: '/orders', label: 'Orders', icon: ShoppingCart },
-    { path: '/calendar', label: 'Calendar', icon: Calendar },
-    { path: '/reports', label: 'Reports', icon: FileText },
   ];
+
+  const navItems = role === 'admin'
+    ? [
+        ...baseNavItems,
+        { path: '/users', label: 'Users', icon: ShieldCheck },
+        // { path: '/calendar', label: 'Calendar', icon: Calendar },
+        // { path: '/reports', label: 'Reports', icon: FileText },
+      ]
+    : [
+        ...baseNavItems,
+        { path: '/calendar', label: 'Calendar', icon: Calendar },
+        { path: '/reports', label: 'Reports', icon: FileText },
+      ];
 
   const isActive = (path: string) => location.pathname === path;
 

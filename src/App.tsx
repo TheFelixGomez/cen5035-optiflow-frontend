@@ -10,7 +10,6 @@ import OrdersPage from "./pages/OrdersPage";
 import CalendarPage from "./pages/CalendarPage";
 import ReportsPage from "./pages/ReportsPage";
 import UsersPage from "./pages/UsersPage";
-import { Toaster } from "./components/ui/toaster";
 
 import { useAuth } from "./stores/auth.store";
 
@@ -59,7 +58,6 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppRoutes />
-      <Toaster />
     </BrowserRouter>
   );
 }

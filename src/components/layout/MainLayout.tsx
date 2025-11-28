@@ -33,8 +33,7 @@ export default function MainLayout() {
     ? [
         ...baseNavItems,
         { path: '/users', label: 'Users', icon: ShieldCheck },
-        // { path: '/calendar', label: 'Calendar', icon: Calendar },
-        // { path: '/reports', label: 'Reports', icon: FileText },
+        { path: '/reports', label: 'Reports', icon: FileText },
       ]
     : [
         ...baseNavItems,

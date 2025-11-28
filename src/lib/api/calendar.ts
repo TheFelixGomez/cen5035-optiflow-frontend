@@ -37,8 +37,14 @@ export const calendarApi = {
   },
 
   async updateDueDate(orderId: string, newDueAt: string) {
-    await apiClient.put(`/calendar/${orderId}`, {
-      new_due_at: newDueAt,
-    });
+    await apiClient.put(`/calendar/${orderId}`,
+      undefined,
+      {
+        params: {
+          new_due_at: newDueAt,
+        },
+        withCredentials: true,
+      }
+    );
   },
 };

@@ -118,7 +118,13 @@ export const ordersApi = {
   },
 
   update: async (id: string, data: UpdateOrderData): Promise<Order> => {
-    const response = await apiClient.put(`/orders/${id}`, data, {
+    const payload: any = { ...data };
+    if (payload.dueDate) {
+      payload.due_at = payload.dueDate;
+      delete payload.dueDate;
+    }
+
+    const response = await apiClient.put(`/orders/${id}`, payload, {
       withCredentials: true,   // <<< AQUI
     });
     return response.data;

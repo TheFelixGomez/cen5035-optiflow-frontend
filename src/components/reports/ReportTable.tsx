@@ -28,6 +28,17 @@ export default function ReportTable({ orders }: ReportTableProps) {
     );
   }
 
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid Date';
+      return format(date, 'MMM dd, yyyy');
+    } catch {
+      return 'Invalid Date';
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -38,6 +49,7 @@ export default function ReportTable({ orders }: ReportTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Order ID</TableHead>
+              <TableHead>User</TableHead>
               <TableHead>Vendor</TableHead>
               <TableHead>Due Date</TableHead>
               <TableHead>Status</TableHead>
@@ -48,8 +60,9 @@ export default function ReportTable({ orders }: ReportTableProps) {
             {orders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">#{order.id.slice(0, 8)}</TableCell>
+                <TableCell>{order.userName || 'Unknown'}</TableCell>
                 <TableCell>{order.vendor?.name || 'Unknown'}</TableCell>
-                <TableCell>{format(new Date(order.dueDate), 'MMM dd, yyyy')}</TableCell>
+                <TableCell>{formatDate(order.dueDate)}</TableCell>
                 <TableCell>
                   <OrderStatusBadge status={order.status} />
                 </TableCell>

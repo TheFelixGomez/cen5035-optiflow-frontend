@@ -38,7 +38,6 @@ export default function MainLayout() {
     : [
         ...baseNavItems,
         { path: '/calendar', label: 'Calendar', icon: Calendar },
-        { path: '/reports', label: 'Reports', icon: FileText },
       ];
 
   const isActive = (path: string) => location.pathname === path;

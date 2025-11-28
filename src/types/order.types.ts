@@ -11,6 +11,8 @@ export interface Order {
   instructions: string;
   createdAt: string;
   updatedAt: string;
+  userId?: string;
+  userName?: string;
 }
 
 export interface CreateOrderData {
@@ -24,7 +26,9 @@ export interface UpdateOrderData extends Partial<CreateOrderData> {}
 
 export interface OrderFilters {
   vendorId?: string;
+  vendorIds?: string[];
   status?: OrderStatus;
+  userIds?: string[];
   dateFrom?: string;
   dateTo?: string;
   search?: string;

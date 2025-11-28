@@ -1,94 +1,28 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-// import { ordersApi } from '@/lib/api/orders';
-import type { Order, OrderStatus } from '@/types/order.types';
+import { ordersApi } from '@/lib/api/orders';
+import type { Order, OrderFilters } from '@/types/order.types';
 import { toast } from './useToast';
-import { mockOrders, mockVendors } from '@/lib/mockData';
-
-interface OrderFilters {
-  status?: OrderStatus;
-  vendorId?: string;
-  search?: string;
-  dateFrom?: string;
-  dateTo?: string;
-}
 
 export const useOrders = (filters?: OrderFilters) => {
-  // MOCK DATA
   return useQuery({
     queryKey: ['orders', filters],
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      let filtered = [...mockOrders];
-
-      if (filters?.status) {
-        filtered = filtered.filter(o => o.status === filters.status);
-      }
-      if (filters?.vendorId) {
-        filtered = filtered.filter(o => o.vendorId === filters.vendorId);
-      }
-      if (filters?.search) {
-        const search = filters.search.toLowerCase();
-        filtered = filtered.filter(o => 
-          o.id.toLowerCase().includes(search) ||
-          o.vendor?.name.toLowerCase().includes(search) ||
-          o.instructions.toLowerCase().includes(search)
-        );
-      }
-      if (filters?.dateFrom) {
-        filtered = filtered.filter(o => o.dueDate >= filters.dateFrom!);
-      }
-      if (filters?.dateTo) {
-        filtered = filtered.filter(o => o.dueDate <= filters.dateTo!);
-      }
-
-      return filtered;
-    },
+    queryFn: () => ordersApi.getAll(filters),
   });
-  
-  // REAL API - Uncomment when backend is ready
-  // return useQuery({
-  //   queryKey: ['orders', filters],
-  //   queryFn: () => ordersApi.getAll(filters),
-  // });
 };
 
 export const useOrder = (id: string) => {
-  // MOCK DATA
   return useQuery({
     queryKey: ['order', id],
-    queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      return mockOrders.find(o => o.id === id) || null;
-    },
+    queryFn: () => ordersApi.getById(id),
     enabled: !!id,
   });
-  
-  // REAL API
-  // return useQuery({
-  //   queryKey: ['order', id],
-  //   queryFn: () => ordersApi.getById(id),
-  //   enabled: !!id,
-  // });
 };
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
-    mutationFn: async (data: Omit<Order, 'id' | 'createdAt' | 'updatedAt' | 'vendor'>) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const vendor = mockVendors.find(v => v.id === data.vendorId);
-      const newOrder: Order = {
-        ...data,
-        id: String(Date.now()),
-        vendor,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      mockOrders.push(newOrder);
-      return newOrder;
-    },
+    mutationFn: (data: any) => ordersApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
@@ -104,41 +38,14 @@ export const useCreateOrder = () => {
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: (data: CreateOrderData) => ordersApi.create(data),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order created',
-  //       description: 'The order has been created successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to create order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
 };
 
 export const useUpdateOrder = () => {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Order> }) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const index = mockOrders.findIndex(o => o.id === id);
-      if (index !== -1) {
-        mockOrders[index] = { ...mockOrders[index], ...data, updatedAt: new Date().toISOString() };
-        return mockOrders[index];
-      }
-      throw new Error('Order not found');
-    },
+    mutationFn: ({ id, data }: { id: string; data: any }) =>
+      ordersApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
@@ -154,40 +61,13 @@ export const useUpdateOrder = () => {
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: ({ id, data }: { id: string; data: UpdateOrderData }) =>
-  //     ordersApi.update(id, data),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order updated',
-  //       description: 'The order has been updated successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to update order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
 };
 
 export const useDeleteOrder = () => {
   const queryClient = useQueryClient();
 
-  // MOCK DATA
   return useMutation({
-    mutationFn: async (id: string) => {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const index = mockOrders.findIndex(o => o.id === id);
-      if (index !== -1) {
-        mockOrders.splice(index, 1);
-      }
-    },
+    mutationFn: (id: string) => ordersApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       toast({
@@ -203,23 +83,4 @@ export const useDeleteOrder = () => {
       });
     },
   });
-  
-  // REAL API
-  // return useMutation({
-  //   mutationFn: (id: string) => ordersApi.delete(id),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['orders'] });
-  //     toast({
-  //       title: 'Order deleted',
-  //       description: 'The order has been deleted successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast({
-  //       title: 'Error',
-  //       description: 'Failed to delete order. Please try again.',
-  //       variant: 'destructive',
-  //     });
-  //   },
-  // });
 };

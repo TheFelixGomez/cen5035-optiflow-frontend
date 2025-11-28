@@ -5,6 +5,7 @@ export interface ReportFilters {
   dateTo: string;
   vendorIds?: string[];
   statuses?: string[];
+  userIds?: string[];
 }
 
 export interface ReportSummary {

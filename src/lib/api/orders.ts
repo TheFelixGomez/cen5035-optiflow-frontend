@@ -124,7 +124,7 @@ export const ordersApi = {
       delete payload.dueDate;
     }
     
-    const response = await apiClient.put(`/orders/${id}`, data, {
+    const response = await apiClient.put(`/orders/${id}`, payload, {
       withCredentials: true,   // <<< AQUI
     });
     return response.data;
@@ -136,4 +136,5 @@ export const ordersApi = {
     });
   },
 };
+
 

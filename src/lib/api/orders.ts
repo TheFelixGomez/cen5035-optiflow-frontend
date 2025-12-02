@@ -53,7 +53,7 @@ export const ordersApi = {
     
     // Transform backend response to frontend format
     let orders = response.data.map((o: any) => {
-      const vendor = vendorsMap.get(o.vendor_id);
+      const vendor = vendorsMap.get(o.vendor_id) as any;
       // user_id in database is stored as email, so look up by that
       const user = o.user_id ? usersMap.get(o.user_id) : null;
       

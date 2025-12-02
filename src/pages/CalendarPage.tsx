@@ -4,7 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { DatesSetArg, EventContentArg, EventDropArg } from "@fullcalendar/core";
 import { useOrders, useUpdateOrder } from "@/hooks/useOrders";
-import type { OrderFilters, OrderStatus } from "@/types/order.types";
+import type {Order, OrderFilters, OrderStatus} from "@/types/order.types";
 import { toast } from "@/hooks/useToast";
 import {
   Select,

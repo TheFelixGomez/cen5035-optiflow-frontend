@@ -36,7 +36,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const user = await getCurrentUser();
-      set({ user, role: inferRole(user.username), loading: false });
+      set({ user, role: (user.role ?? inferRole(user.username)) as UserRole, loading: false });
     } catch {
       localStorage.removeItem("of_token");
       set({ token: null, user: null, role: null, loading: false });
@@ -52,7 +52,7 @@ login: async (username, password) => {
     set({
       token: t.access_token,
       user,
-      role: inferRole(user.username),
+      role: (user.role ?? inferRole(user.username)) as UserRole,
       loading: false,
       isAuthenticated: true,
     });

@@ -129,7 +129,10 @@ export default function ReportsPage() {
   const userFilter: MultiSelectConfig = {
     label: 'Users',
     placeholder: 'Select users',
-    options: (users || []).map((u) => ({ id: u.id, label: u.username })),
+    options: (users || []).map((u) => ({
+      id: u.username,
+      label: u.username,
+    })),
     selectedIds: selectedUserIds,
     allSelected: allUsersSelected,
     onToggle: handleUserToggle,

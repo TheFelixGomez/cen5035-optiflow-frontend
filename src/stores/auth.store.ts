@@ -3,12 +3,6 @@ import { registerUser, login, getCurrentUser, type User } from "@/lib/api/auth";
 
 type UserRole = "admin" | "customer";
 
-function inferRole(username?: string): UserRole {
-  const raw = import.meta.env.VITE_ADMIN_USERS as string | undefined;
-  const admins = (raw ?? "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-  return username && admins.includes(username.toLowerCase()) ? "admin" : "customer";
-}
-
 type AuthState = {
   user: User | null;
   role: UserRole | null;
@@ -36,7 +30,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const user = await getCurrentUser();
-      set({ user, role: inferRole(user.username), loading: false });
+      set({ user, role: user.role as UserRole, loading: false });
     } catch {
       localStorage.removeItem("of_token");
       set({ token: null, user: null, role: null, loading: false });
@@ -52,7 +46,7 @@ login: async (username, password) => {
     set({
       token: t.access_token,
       user,
-      role: inferRole(user.username),
+      role: user.role as UserRole,
       loading: false,
       isAuthenticated: true,
     });

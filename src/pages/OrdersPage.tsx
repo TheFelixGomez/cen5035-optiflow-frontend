@@ -98,7 +98,7 @@ export default function OrdersPage() {
     const searchLower = search.toLowerCase();
 
     const matchesStatus =
-      statusFilter === "all" || o.status === statusFilter;
+      statusFilter === "all" || o.status.toLowerCase() === statusFilter.toLowerCase();
     const matchesSearch =
       vendorName.includes(searchLower) ||
       o.status.toLowerCase().includes(searchLower);
